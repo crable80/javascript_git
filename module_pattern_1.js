@@ -36,14 +36,39 @@ console.log('obj2.publicMethod(): ', obj2.publicMethod());
 
 
 /* 모듈패턴 #2 ---------------------------------------------------------------------*/
-//#네임스페이스
-// 위험하다
+//(1)네임스페이스 
+//-위험하다 중복가능성...
 var MYAPP = {};
 
-//개선안
+//개선안 (체크필요)
 if(typeof MYAPP === 'undefined'){
     MYAPP = {};
 }
 
 // 또는 더 짧게 작성가능
 var MYAPP = MYAPP || {};
+
+//(2)비공개 멤버의 헛점 (외부 코드에서 비공개 변수값 수정 가능) 
+function Gadget(){
+    //비공개 멤버
+    var specs = {
+        screen_width : 320,
+        screen_height: 480,
+        color : "width"
+    };
+
+    //공개함수
+    this.getSpecs = function(){
+        return specs;
+    };
+}
+
+var toy = new Gadget();
+specs = toy.getSpecs();
+specs.color = "black"; //값변경
+specs.price = "free"; //값추가
+console.log('toy.getSpecs(): ', toy.getSpecs()); //원본값이 변경되다니! 젠장! 
+
+
+
+
