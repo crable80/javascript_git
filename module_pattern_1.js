@@ -70,5 +70,70 @@ specs.price = "free"; //값추가
 console.log('toy.getSpecs(): ', toy.getSpecs()); //원본값이 변경되다니! 젠장! 
 
 
+//(3)모듈화(캡슐화)
+// 전역 스코프(gloval scope)
+// 변수(멤버변수)
+//var sayHi = "안녕";
+
+// //함수 영역
+// var moduleFunc = function(){
+//     //함수 스코프(새로운 영역이 생성됨)
+// }
+
+//위의 멤버변수와 함수영역을 하나의 코드블럭을 생성한다
+//즉, 위의 코드는 전역에 정의되어 있지만 멤버변수와 함수영역을 전역 스코프와 상관없이
+//하나의 새로운 범위를 생성, 관리하기위해 모듈화 시킨다
+
+//새로운 모듈화(캡슐화)
+//자가 실행 함수
+(function(){
+    let sayHi = "안녕";
+
+    let moduleFunc = ()=>{
+        return sayHi;
+    }
+
+    console.log(moduleFunc()); //같은 스코프안에서 함수 호출함
+}())// 즉시 실행 함수
+
+//외부에서 호출
+//console.log(sayHi); //Uncaught ReferenceError ReferenceError: sayHi is not defined
+//console.log(moduleFunc()); //Uncaught ReferenceError ReferenceError: moduleFunc is not defined
+
+//모듈패턴(싱글톤)
+// let singleton = {
+//     name : value,
+//     method : function(){
+//         //메소드 코드
+//     }
+// }
+
+//객체 리터럴과 비공개 멤버
+let myObj = function(){
+    //고유멤버
+    let sayHi = "안녕하세요!!";
+    let intCnt = 0;
+    
+    let hi = ()=>{
+        intCnt += 1;
+        return sayHi;
+    }
+
+    let cnt = ()=>{
+        return intCnt;
+    }
+
+    return {
+        getHi : ()=>{
+            return sayHi;
+        },
+        getHi2 : ()=>{
+            return "반갑습니다!";
+        },
+        getHi3 : hi,
+        getHi4 : intCnt, //*intCnt를 직접 외부에 반환시켜주면 증가된 값이 출력되지 않는다.
+        getHi5 : cnt
+    }
+};
 
 
