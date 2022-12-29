@@ -136,4 +136,138 @@ let myObj = function(){
     }
 };
 
+let obj02 = new myObj(); //새로운 객체를 만들때마다 비공개 멤버가 매번 재생성된다는 단점이있음.
+
+//중복을 없애고 메모리 절약하려면 공통 프로퍼티와 메서드를 생성자의 prototype 프로퍼티에 추가해야 합니다.
+//이렇게하면 동일한 생성자로 생성한 모든 인스턴스가 공통된 부분을 공유하게 된다!
+//감춰진 비공개 멤버들도 모든 인스턴스가 함께 쓸수있다.
+//이를 위해선 두가지 패턴, 생성자 함수 내부에 비공개 멤버를 만드는 패턴과 객체 리터럴로 비공개 멤버를 만드는 패턴을 
+//함께 써야한다. 왜냐하면 prototype 프로퍼티도 결국 객체라서 객체 리터럴로 생성할 수 있기 때문이다.
+function Gadget02(){
+    //비공개 멤버
+    let name = 'iPod'; 
+    //공개함수
+    this.getName = ()=>{
+        return name;
+    }
+}
+
+Gadget02.prototype = (function(){
+    //비공개 멤버
+    let browser = 'Mobile Webkit';
+    //공개된 프로토타입 멤버
+    return{
+        getBrowser : ()=>{
+            return browser;
+        }
+    }
+})();
+
+let toy02 = new Gadget02();
+console.log(toy02.getName()); //객체 인스턴스 특권 메서드
+console.log(toy02.getBrowser()); //프로토타입의 특권 메서드
+
+
+//노출 패턴(revelation pattern)은 비공개 메서드를 구현하면서 동시에 공개 메서드로도 노출하는 것을 말합니다.
+//객체의 모든 기능이 객체가 수행하는 작업에 필수불가결한 것들이라서 최대한 보호가 필요한데, 동시에 이 기능들을
+//유용성 때문에 공개적인 접근도 허용하고 싶은 경우가 있을수있다.
+let arr;
+(function(){
+    let astr = '[object Array]';
+    let toString = Object.prototype.toString;
+
+    function isArray(a){
+        return toString.call(a) === astr;
+    }
+
+    function indexOf(haystack, needle){
+        let i = 0,
+            max = haystack.length;
+        
+        for(; i < max; i += 1){
+            if(haystack[i] === needle){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    arr = {
+        isArray : isArray,
+        indexOf : indexOf,
+        inArray : indexOf
+    }
+})();
+
+console.log('arr.isArray([1, 2]): ', arr.isArray([1, 2]));
+console.log('arr.isArray({0: 1}): ', arr.isArray({0: 1}));
+console.log("arr.indexOf(['a', 'b', 's'], 's'): ", arr.indexOf(['a', 'b', 's'], 's'));
+console.log("arr.inArray(['a', 'b', 's'], 's'): ", arr.inArray(['a', 'b', 's'], 's'));
+
+//namespace 생성
+var MYAPP = MYAPP || {};
+MYAPP.namespace = function (ns_string) {
+    var parts  = ns_string.split('.'),
+        parent = MYAPP,
+        i;
+
+    // 처음에 중복되는 전역 객체명은 제거한다.
+	if (parts[0] === 'MYAPP') {
+      parts = parts.slice(1);
+	}
+
+	for (i = 0; i < parts.length; i += 1) {
+		if (typeof parent[parts[i]] === 'undefined') {
+			parent[parts[i]] = {};
+		}
+		parent = parent[parts[i]];
+	}
+	
+	return parent;
+
+};
+
+//생성자를 생성하는 모듈
+MYAPP.namespace('MYAPP.utilities.Array');
+
+MYAPP.utilities.Array = (function(){
+	// 의존 관계 선언
+	var uobj  = MYAPP.utilities.object,
+	    ulang = MYAPP.utilities.lang,
+	    // 비공개 프로퍼티와 메서드를 선언한 후 ...
+	    Constr;
+	// var 선언을 마친다.
+	
+	// 필요하다면 일회성 초기화 절차를 실행한다.
+	// ...
+	
+	// 공개 API - 생성자 함수
+	Constr = function (o) {
+		this.elements = this.toArray(o);
+	};
+	
+	// 공개 API - 프로토타입
+	Constr.prototype = {
+		consturctor : MYAPP.utilities.Array,
+		version : '2.0',
+		toArray : function (obj) {
+            let arry = [];
+			for (key in obj) {
+				arry.push(obj[key]);
+			}
+			return arry;
+		}
+	};
+	
+	// 생성자 함수를 반환한다.
+	// 이 함수가 새로운 네임스페이스에 할당될 것이다.
+	return Constr;
+	
+}());
+
+// 위 생성자 함수는 다음과 같이 사용할 수 있다.
+var arr001 = new MYAPP.utilities.Array({k1:'v1', k2:'v2', k3:'v3'});
+console.log(arr001.version);
+
+//샌드박스 패턴
 
